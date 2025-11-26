@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Sistema CRUD completo para gestión de empleados">
+    <meta name="author" content="Arowarlin Suarez - UASD 100679806">
+    <title>Sistema CRUD - Gestión de Empleados | Arowarlin Suarez</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🏢 Sistema de Gestión de Empleados</h1>
+            <p>Administra tu base de datos de empleados de manera eficiente</p>
+            <div class="header-actions">
+                <button onclick="showSystemInfo()" class="btn-info">
+                    ℹ️ Info
+                </button>
+                <button onclick="generateReport()" class="btn-info">
+                    📊 Reporte
+                </button>
+            </div>
+        </header>
+
+        <section class="toolbar">
+            <div class="toolbar-section">
+                <h3>🔧 Herramientas</h3>
+                <div class="toolbar-buttons">
+                    <button onclick="exportData()" class="btn-tool">
+                        📥 Exportar JSON
+                    </button>
+                    <button onclick="importData()" class="btn-tool">
+                        📤 Importar JSON
+                    </button>
+                    <button onclick="printTable()" class="btn-tool">
+                        🖨️ Imprimir
+                    </button>
+                    <button onclick="clearAllData()" class="btn-tool btn-danger-tool">
+                        🗑️ Limpiar BD
+                    </button>
+                </div>
+            </div>
+
+            <div class="toolbar-section">
+                <h3>🔍 Filtros Rápidos</h3>
+                <div class="filter-buttons">
+                    <select id="departmentFilter" onchange="filterByDepartment(this.value)" class="filter-select">
+                        <option value="all">Todos los Departamentos</option>
+                        <option value="Tecnología">Tecnología</option>
+                        <option value="Recursos Humanos">Recursos Humanos</option>
+                        <option value="Ventas">Ventas</option>
+                        <option value="Marketing">Marketing</option>
+                        <option value="Finanzas">Finanzas</option>
+                    </select>
+
+                    <select id="statusFilter" onchange="filterByStatus(this.value)" class="filter-select">
+                        <option value="all">Todos los Estados</option>
+                        <option value="Activo">Activo</option>
+                        <option value="Inactivo">Inactivo</option>
+                        <option value="Vacaciones">Vacaciones</option>
+                    </select>
+
+                    <button onclick="loadTableData(); updateStats();" class="btn-tool">
+                        🔄 Reset
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <section class="search-section">
+            <div class="search-box">
+                <input 
+                    type="text" 
+                    id="searchInput" 
+                    placeholder="🔍 Buscar por nombre, email, departamento, cargo o teléfono..."
+                >
+                <button onclick="searchRecords()" class="btn-search">
+                    🔍 Buscar
+                </button>
+                <button onclick="clearSearch()" class="btn-secondary">
+                    ❌ Limpiar
+                </button>
+            </div>
+        </section>
+
+        <section class="form-section">
+            <h2 id="formTitle">➕ Agregar Nuevo Empleado</h2>
+            
+            <form id="employeeForm" autocomplete="off">
+                <input type="hidden" id="employeeId">
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="name">
+                            👤 Nombre Completo <span class="required">*</span>
+                        </label>
+                        <input 
+                            type="text" 
+                            id="name" 
+                            required 
+                            placeholder="Ej: Juan Pérez"
+                        >
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="email">
+                            📧 Email Corporativo <span class="required">*</span>
+                        </label>
+                        <input 
+                            type="email" 
+                            id="email" 
+                            required 
+                            placeholder="ejemplo@empresa.com"
+                        >
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="phone">
+                            📱 Teléfono
+                        </label>
+                        <input 
+                            type="tel" 
+                            id="phone" 
+                            placeholder="(000) 000-0000"
+                        >
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="department">
+                            🏢 Departamento <span class="required">*</span>
+                        </label>
+                        <select id="department" required>
+                            <option value="">-- Seleccione un Departamento --</option>
+                            <option value="Tecnología">💻 Tecnología</option>
+                            <option value="Recursos Humanos">👥 Recursos Humanos</option>
+                            <option value="Ventas">💼 Ventas</option>
+                            <option value="Marketing">📢 Marketing</option>
+                            <option value="Finanzas">💰 Finanzas</option>
+                            <option value="Operaciones">⚙️ Operaciones</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="position">
+                            💼 Cargo/Puesto <span class="required">*</span>
+                        </label>
+                        <input 
+                            type="text" 
+                            id="position" 
+                            required 
+                            placeholder="Ej: Desarrollador Senior"
+                        >
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="salary">
+                            💵 Salario Mensual (USD)
+                        </label>
+                        <input 
+                            type="number" 
+                            id="salary" 
+                            min="0" 
+                            step="0.01" 
+                            placeholder="0.00"
+                        >
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="hireDate">
+                            📅 Fecha de Contratación
+                        </label>
+                        <input type="date" id="hireDate">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="status">
+                            ⭐ Estado Laboral
+                        </label>
+                        <select id="status">
+                            <option value="Activo">✅ Activo</option>
+                            <option value="Inactivo">❌ Inactivo</option>
+                            <option value="Vacaciones">🏖️ Vacaciones</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-buttons">
+                    <button type="submit" class="btn-primary">
+                        💾 Guardar Registro
+                    </button>
+                    <button type="button" onclick="cancelEdit()" class="btn-secondary">
+                        ❌ Cancelar
+                    </button>
+                    <button type="reset" class="btn-secondary">
+                        🔄 Limpiar Campos
+                    </button>
+                </div>
+
+                <p class="form-note">
+                    <span class="required">*</span> Campos obligatorios
+                </p>
+            </form>
+        </section>
+
+        <section class="stats-section">
+            <div class="stat-card">
+                <div class="stat-icon">👥</div>
+                <div class="stat-info">
+                    <h3 id="totalRecords">0</h3>
+                    <p>Total Empleados</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">✅</div>
+                <div class="stat-info">
+                    <h3 id="activeRecords">0</h3>
+                    <p>Activos</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">🏖️</div>
+                <div class="stat-info">
+                    <h3 id="vacationRecords">0</h3>
+                    <p>En Vacaciones</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">🏢</div>
+                <div class="stat-info">
+                    <h3 id="departmentCount">0</h3>
+                    <p>Departamentos</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="table-section">
+            <div class="table-header">
+                <h2>📋 Lista de Empleados</h2>
+                <div class="table-actions">
+                    <button onclick="sortTable('name')" class="btn-sort">
+                        🔤 Nombre
+                    </button>
+                    <button onclick="sortTable('department')" class="btn-sort">
+                        🏢 Depto
+                    </button>
+                    <button onclick="sortTable('salary')" class="btn-sort">
+                        💵 Salario
+                    </button>
+                </div>
+            </div>
+            
+            <div class="table-wrapper">
+                <table id="employeeTable">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>👤 Nombre</th>
+                            <th>📧 Email</th>
+                            <th>📱 Teléfono</th>
+                            <th>🏢 Departamento</th>
+                            <th>💼 Cargo</th>
+                            <th>💵 Salario</th>
+                            <th>⭐ Estado</th>
+                            <th>⚙️ Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                        <tr>
+                            <td colspan="9" class="loading-state">
+                                <div class="loader"></div>
+                                <p>Cargando datos...</p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <div id="confirmModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>⚠️ Confirmar Eliminación</h3>
+                    <button onclick="closeModal()" class="modal-close">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <p>¿Está seguro de que desea eliminar este registro?</p>
+                    <p class="warning">⚠️ Esta acción no se puede deshacer.</p>
+                </div>
+                <div class="modal-buttons">
+                    <button onclick="confirmDelete()" class="btn-danger">
+                        🗑️ Sí, Eliminar
+                    </button>
+                    <button onclick="closeModal()" class="btn-secondary">
+                        ❌ Cancelar
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <footer class="main-footer">
+            <div class="footer-content">
+                <p><strong>Sistema CRUD de Gestión de Empleados</strong> v1.0.0</p>
+                <p>Desarrollado con ❤️ usando HTML5, CSS3 y JavaScript ES6</p>
+                <div class="developer-info">
+                    <p><strong>👨‍💻 Desarrollado por:</strong></p>
+                    <p class="developer-name">Arowarlin Suarez</p>
+                    <p class="developer-details">
+                        🎓 Matrícula: <strong>100679806</strong><br>
+                        🏛️ Universidad Autónoma de Santo Domingo (UASD)
+                    </p>
+                </div>
+                <p class="copyright">© 2025 - Todos los derechos reservados</p>
+            </div>
+        </footer>
+    </div>
+
+    <script src="database.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
